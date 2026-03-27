@@ -202,19 +202,19 @@ function generatePDF(){
   var doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
   var W=612,H=792,mg=36,cw=W-2*mg;
 
-  var company=(document.getElementById('company').value||'Client').toUpperCase();
-  var city=(document.getElementById('city').value||'').toUpperCase();
-  var date=(document.getElementById('date').value||'').toUpperCase();
-  var onboard=(document.getElementById('onboard').value||'').toUpperCase();
-  var poolExpiry=(document.getElementById('pool_expiry').value||'').toUpperCase();
+  var company=(document.getElementById('company').value||'Client');
+  var city=(document.getElementById('city').value||'');
+  var date=(document.getElementById('date').value||'');
+  var onboard=(document.getElementById('onboard').value||'');
+  var poolExpiry=(document.getElementById('pool_expiry').value||'');
 
   var eCons=document.getElementById('e_cons').value;
-  var eSup=(document.getElementById('e_supplier').value||'Supplier').toUpperCase();
+  var eSup=(document.getElementById('e_supplier').value||'Supplier');
   var eSrate=parseFloat(document.getElementById('e_srate').value);
   var eBrate=parseFloat(document.getElementById('e_brate').value);
 
   var gCons=document.getElementById('g_cons').value;
-  var gSup=(document.getElementById('g_supplier').value||'Supplier').toUpperCase();
+  var gSup=(document.getElementById('g_supplier').value||'Supplier');
   var gSrate=parseFloat(document.getElementById('g_srate').value);
   var gBrate=parseFloat(document.getElementById('g_brate').value);
 
