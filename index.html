@@ -1,1 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MPN Capital Markets — Energy Cost Savings PDF Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f4f3ef; --surface: #ffffff; --border: #e2e0d8;
+    --text: #1a1916; --muted: #7a7870;
+    --orange: #e8621a; --orange-light: #fdf0e8;
+    --green: #1d6b3a; --green-light: #e8f5ed;
+    --radius: 10px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header { background: #0f1520; padding: 18px 40px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-name { font-size: 18px; font-weight: 600; color: #fff; letter-spacing: -0.3px; display: block; }
+  .logo-sub { font-size: 11px; color: #e8621a; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; display: block; }
+  .header-title { font-size: 13px; color: #6b7280; font-family: 'DM Mono', monospace; }
+  main { max-width: 800px; margin: 0 auto; padding: 40px 20px 80px; }
+  .page-title { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-subtitle { font-size: 12px; color: var(--muted); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 12px; font-weight: 500; color: var(--muted); }
+  input {
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 9px 12px; outline: none; transition: border-color 0.15s; width: 100%;
+  }
+  input:focus { border-color: var(--orange); background: #fff; }
+  input::placeholder { color: #c5c2ba; }
+  .section-divider { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 20px 0 14px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .shared-note { font-size: 11px; color: var(--muted); background: #f8f7f4; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; margin-bottom: 16px; }
+  .shared-note strong { color: var(--orange); }
+  .preview-bar { display: none; margin-top: 16px; background: var(--green-light); border: 1px solid #b6dfc5; border-radius: 8px; padding: 14px 16px; }
+  .preview-bar.visible { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .preview-stat p:first-child { font-size: 11px; color: var(--green); font-weight: 500; margin-bottom: 2px; }
+  .preview-stat p:last-child { font-size: 16px; font-weight: 600; color: var(--green); font-family: 'DM Mono', monospace; }
+  .order-notice { display: none; margin-bottom: 16px; background: var(--orange-light); border: 1px solid #f5c9a8; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--orange); font-weight: 500; }
+  .order-notice.visible { display: block; }
+  .generate-bar { background: #0f1520; border-radius: var(--radius); padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .generate-bar p:first-child { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .generate-bar p:last-child { font-size: 12px; color: #6b7280; }
+  .btn-generate { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: #fff; background: var(--orange); border: none; border-radius: 8px; padding: 12px 28px; cursor: pointer; transition: background 0.15s, transform 0.1s; white-space: nowrap; }
+  .btn-generate:hover { background: #d45516; }
+  .btn-generate:active { transform: scale(0.98); }
+  @media (max-width: 620px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    header { padding: 16px 20px; }
+    main { padding: 24px 16px 60px; }
+    .generate-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
 
+<header>
+  <div>
+    <span class="logo-name">MPN Capital Markets</span>
+    <span class="logo-sub">Energy Procurement & Risk Management</span>
+  </div>
+  <span class="header-title">PDF Generator</span>
+</header>
+
+<main>
+  <h1 class="page-title">Energy cost savings</h1>
+  <p class="page-sub">Fill in the client details and rates below. Savings are calculated automatically and the section with the biggest savings appears first on the PDF.</p>
+
+  <!-- Client Info -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#f3f0ff;">&#128203;</div>
+      <div>
+        <div class="card-title">Client information</div>
+        <div class="card-subtitle">Shared across both electricity and natural gas sections</div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-bottom:14px;">
+      <div class="field"><label>Company name</label><input type="text" id="company" /></div>
+      <div class="field"><label>City / Province</label><input type="text" id="city" /></div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Report date (e.g. May 2025)</label><input type="text" id="date" /></div>
+      <div class="field"><label>Onboarding date</label><input type="text" id="onboard" /></div>
+      <div class="field"><label>Pool expiry date</label><input type="text" id="pool_expiry" /></div>
+    </div>
+  </div>
+
+  <!-- Electricity -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#fff3e0;">&#9889;</div>
+      <div>
+        <div class="card-title">Electricity</div>
+        <div class="card-subtitle">Annual costs calculate automatically from consumption and rates</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Annual consumption (kWh)</label><input type="number" id="e_cons" oninput="calc()" /></div>
+      <div class="field"><label>Supplier name</label><input type="text" id="e_supplier" /></div>
+    </div>
+    <div class="section-divider">Rates</div>
+    <div class="grid-2">
+      <div class="field"><label>Supplier rate ($/kWh)</label><input type="number" id="e_srate" step="0.0001" oninput="calc()" /></div>
+      <div class="field"><label>MPN broker rate ($/kWh)</label><input type="number" id="e_brate" step="0.0001" oninput="calc()" /></div>
+    </div>
+    <div class="preview-bar" id="e_preview">
+      <div class="preview-stat"><p>Supplier annual cost</p><p id="e_scost_out">—</p></div>
+      <div class="preview-stat"><p>MPN annual cost</p><p id="e_bcost_out">—</p></div>
+      <div class="preview-stat"><p>Portfolio gain</p><p id="e_gain_out">—</p></div>
+    </div>
+  </div>
+
+  <!-- Natural Gas -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon" style="background:#e3f2fd;">&#128293;</div>
+      <div>
+        <div class="card-title">Natural gas</div>
+        <div class="card-subtitle">Annual costs calculate automatically from consumption and rates</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Annual consumption (GJs)</label><input type="number" id="g_cons" oninput="calc()" /></div>
+      <div class="field"><label>Supplier name</label><input type="text" id="g_supplier" /></div>
+    </div>
+    <div class="section-divider">Rates</div>
+    <div class="grid-2">
+      <div class="field"><label>Supplier rate ($/GJ)</label><input type="number" id="g_srate" step="0.01" oninput="calc()" /></div>
+      <div class="field"><label>MPN broker rate ($/GJ)</label><input type="number" id="g_brate" step="0.01" oninput="calc()" /></div>
+    </div>
+    <div class="preview-bar" id="g_preview">
+      <div class="preview-stat"><p>Supplier annual cost</p><p id="g_scost_out">—</p></div>
+      <div class="preview-stat"><p>MPN annual cost</p><p id="g_bcost_out">—</p></div>
+      <div class="preview-stat"><p>Portfolio gain</p><p id="g_gain_out">—</p></div>
+    </div>
+  </div>
+
+  <div class="order-notice" id="order_notice"></div>
+
+  <div class="generate-bar">
+    <div>
+      <p>Download PDF</p>
+      <p>Biggest savings section appears first automatically</p>
+    </div>
+    <button class="btn-generate" onclick="generatePDF()">Generate PDF</button>
+  </div>
+</main>
+
+<script>
+var _e={scost:0,bcost:0,gain:0,pct:'0%'};
+var _g={scost:0,bcost:0,gain:0,pct:'0%'};
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function pct(a,b){return a>0?((a-b)/a*100).toFixed(1)+'%':'0%';}
+
+function calc(){
+  var ec=parseFloat(document.getElementById('e_cons').value);
+  var esr=parseFloat(document.getElementById('e_srate').value);
+  var ebr=parseFloat(document.getElementById('e_brate').value);
+  var gc=parseFloat(document.getElementById('g_cons').value);
+  var gsr=parseFloat(document.getElementById('g_srate').value);
+  var gbr=parseFloat(document.getElementById('g_brate').value);
+
+  var ep=document.getElementById('e_preview');
+  if(!isNaN(ec)&&!isNaN(esr)&&!isNaN(ebr)){
+    _e.scost=ec*esr;_e.bcost=ec*ebr;_e.gain=_e.scost-_e.bcost;_e.pct=pct(_e.scost,_e.bcost);
+    document.getElementById('e_scost_out').textContent=fmt(_e.scost);
+    document.getElementById('e_bcost_out').textContent=fmt(_e.bcost);
+    document.getElementById('e_gain_out').textContent=fmt(_e.gain)+' ('+_e.pct+')';
+    ep.classList.add('visible');
+  } else {ep.classList.remove('visible');_e.gain=0;}
+
+  var gp=document.getElementById('g_preview');
+  if(!isNaN(gc)&&!isNaN(gsr)&&!isNaN(gbr)){
+    _g.scost=gc*gsr;_g.bcost=gc*gbr;_g.gain=_g.scost-_g.bcost;_g.pct=pct(_g.scost,_g.bcost);
+    document.getElementById('g_scost_out').textContent=fmt(_g.scost);
+    document.getElementById('g_bcost_out').textContent=fmt(_g.bcost);
+    document.getElementById('g_gain_out').textContent=fmt(_g.gain)+' ('+_g.pct+')';
+    gp.classList.add('visible');
+  } else {gp.classList.remove('visible');_g.gain=0;}
+
+  var notice=document.getElementById('order_notice');
+  if(_e.gain>0&&_g.gain>0){
+    var top=_e.gain>=_g.gain?'Electricity':'Natural Gas';
+    notice.textContent=top+' has the bigger savings \u2014 it will appear first on the PDF.';
+    notice.classList.add('visible');
+  } else {notice.classList.remove('visible');}
+}
+
+function generatePDF(){
+  var {jsPDF}=window.jspdf;
+  var doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+  var W=612,H=792,mg=36,cw=W-2*mg;
+
+  var company=(document.getElementById('company').value||'Client').toUpperCase();
+  var city=(document.getElementById('city').value||'').toUpperCase();
+  var date=(document.getElementById('date').value||'').toUpperCase();
+  var onboard=(document.getElementById('onboard').value||'').toUpperCase();
+  var poolExpiry=(document.getElementById('pool_expiry').value||'').toUpperCase();
+
+  var eCons=document.getElementById('e_cons').value;
+  var eSup=(document.getElementById('e_supplier').value||'Supplier').toUpperCase();
+  var eSrate=parseFloat(document.getElementById('e_srate').value);
+  var eBrate=parseFloat(document.getElementById('e_brate').value);
+
+  var gCons=document.getElementById('g_cons').value;
+  var gSup=(document.getElementById('g_supplier').value||'Supplier').toUpperCase();
+  var gSrate=parseFloat(document.getElementById('g_srate').value);
+  var gBrate=parseFloat(document.getElementById('g_brate').value);
+
+  var BG='#0a0f1a',CARD='#111827',OR='#f97316',GR='#22c55e';
+  var GRAY='#9ca3af',LG='#d1d5db',DIV='#2d3748',HL='#1a2a1a';
+
+  doc.setFillColor(BG);doc.rect(0,0,W,H,'F');
+  doc.setFillColor(CARD);doc.rect(0,0,W,88,'F');
+  doc.setFillColor(OR);doc.rect(0,0,6,88,'F');
+
+  doc.setTextColor('#ffffff');doc.setFont('helvetica','bold');doc.setFontSize(15);
+  doc.text('MPN',mg+12,50);
+  doc.setFont('helvetica','normal');doc.setFontSize(10);
+  doc.text('Capital Markets',mg+12,64);
+  doc.setTextColor(GRAY);doc.setFontSize(7.5);
+  doc.text('Energy Procurement & Risk Management',mg+12,76);
+
+  doc.setTextColor('#ffffff');doc.setFont('helvetica','bold');doc.setFontSize(22);
+  doc.text('Energy Cost Savings Analysis',W-mg,30,{align:'right'});
+  doc.setTextColor(GRAY);doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text('Prepared by MPN Capital Markets',W-mg,46,{align:'right'});
+  doc.setTextColor(OR);doc.setFont('helvetica','bold');doc.setFontSize(11);
+  doc.text(company,W-mg,62,{align:'right'});
+  doc.setTextColor(GRAY);doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text(date+(city?' | '+city:''),W-mg,76,{align:'right'});
+
+  var c0=mg+10,c1=mg+310,c2=mg+cw-8;
+
+  function drawSection(sy,label,cons,runit,supName,supRate,supCost,broRate,broCost,gain,gainPct){
+    doc.setFillColor(OR);doc.rect(mg,sy,8,15,'F');
+    doc.setTextColor('#ffffff');doc.setFont('helvetica','bold');doc.setFontSize(11);
+    doc.text(label,mg+16,sy+11);
+
+    var cy=sy+22,ch=155;
+    doc.setFillColor(CARD);doc.roundedRect(mg,cy,cw,ch,8,8,'F');
+
+    doc.setTextColor('#ffffff');doc.setFont('helvetica','bold');doc.setFontSize(11);
+    doc.text('Annual Consumption: '+cons,c0,cy+20);
+
+    var hy=cy+40;
+    doc.setTextColor(GRAY);doc.setFont('helvetica','normal');doc.setFontSize(8);
+    doc.text('Description',c0,hy);
+    doc.text('Rate ('+runit+')',c1,hy,{align:'right'});
+    doc.text('Annual Cost',c2,hy,{align:'right'});
+
+    doc.setDrawColor(DIV);doc.setLineWidth(0.5);
+    doc.line(mg+10,hy+5,mg+cw-10,hy+5);
+
+    var r1=hy+22;
+    doc.setTextColor(LG);doc.setFont('helvetica','normal');doc.setFontSize(9);
+    doc.text('Supplier Rate  ('+supName+')',c0,r1);
+    doc.text(supRate,c1,r1,{align:'right'});
+    doc.text(supCost,c2,r1,{align:'right'});
+
+    var r2=r1+26;
+    doc.setFillColor(HL);doc.roundedRect(mg+6,r2-7,cw-12,22,4,4,'F');
+    doc.setTextColor(OR);doc.setFont('helvetica','bold');doc.setFontSize(9);
+    doc.text('Broker Channel \u2013 Hybrid',c0,r2+7);
+    doc.setTextColor('#ffffff');
+    doc.text(broRate,c1,r2+7,{align:'right'});
+    doc.text(broCost,c2,r2+7,{align:'right'});
+
+    var r3=r2+34;
+    doc.setTextColor(GR);doc.setFont('helvetica','bold');doc.setFontSize(9);
+    doc.text('Portfolio Gain',c0,r3);
+    doc.setFont('helvetica','normal');
+    doc.text('Total Savings:',c1-38,r3,{align:'right'});
+    doc.setFont('helvetica','bold');
+    doc.text(gain,c1,r3,{align:'right'});
+    doc.setFont('helvetica','normal');
+    doc.text('% Saved:',c2-38,r3,{align:'right'});
+    doc.setFont('helvetica','bold');
+    doc.text(gainPct,c2,r3,{align:'right'});
+
+    doc.setTextColor(GRAY);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+    doc.text('Onboarding: '+onboard+'   \u2022   Pool Expiry: '+poolExpiry+'   \u2022   Rate Type: Broker Channel \u2013 Hybrid',c0,cy+ch-10);
+
+    return cy+ch;
+  }
+
+  var sections=[];
+  var eOk=eCons&&!isNaN(eSrate)&&!isNaN(eBrate);
+  if(eOk) sections.push({label:'ELECTRICITY',cons:Number(eCons).toLocaleString()+' kWh',runit:'$/kWh',
+    supName:eSup,supRate:'$ '+eSrate.toFixed(4),supCost:fmt(_e.scost),
+    broRate:'$ '+eBrate.toFixed(4),broCost:fmt(_e.bcost),
+    gain:fmt(_e.gain),gainPct:_e.pct,_g:_e.gain});
+
+  var gOk=gCons&&!isNaN(gSrate)&&!isNaN(gBrate);
+  if(gOk) sections.push({label:'NATURAL GAS',cons:Number(gCons).toLocaleString()+' GJs',runit:'$/GJ',
+    supName:gSup,supRate:'$ '+gSrate.toFixed(2),supCost:fmt(_g.scost),
+    broRate:'$ '+gBrate.toFixed(2),broCost:fmt(_g.bcost),
+    gain:fmt(_g.gain),gainPct:_g.pct,_g:_g.gain});
+
+  sections.sort(function(a,b){return b._g-a._g;});
+
+  var curY=100;
+  sections.forEach(function(s){
+    curY=drawSection(curY,s.label,s.cons,s.runit,s.supName,s.supRate,s.supCost,
+      s.broRate,s.broCost,s.gain,s.gainPct)+24;
+  });
+
+  doc.setFillColor('#0d1525');doc.rect(0,H-28,W,28,'F');
+  doc.setTextColor(GRAY);doc.setFont('helvetica','normal');doc.setFontSize(7);
+  doc.text('MPN Capital Markets  |  mpncapitalmarkets.com  |  Energy Procurement & Risk Management',mg,H-10);
+  doc.text('Rates subject to market conditions. Valid as of '+date+'.',W-mg,H-10,{align:'right'});
+
+  var fname=(company.replace(/\s+/g,'_')||'Client')+'_Energy_Savings.pdf';
+  doc.save(fname);
+}
+</script>
+</body>
+</html>
